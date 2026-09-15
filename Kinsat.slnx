@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Kinsat.Api/Kinsat.Api.csproj" />
+    <Project Path="src/Kinsat.Core/Kinsat.Core.csproj" />
+    <Project Path="src/Kinsat.Sdk/Kinsat.Sdk.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Kinsat.Core.Smoketest/Kinsat.Core.Smoketest.csproj" />
+    <Project Path="tests/Kinsat.Core.Tests/Kinsat.Core.Tests.csproj" />
+  </Folder>
+</Solution>
