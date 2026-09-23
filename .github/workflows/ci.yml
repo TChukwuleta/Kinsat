@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Run xUnit test suite
+        run: dotnet test tests/Kinsat.Core.Tests/Kinsat.Core.Tests.csproj --no-build --configuration Release --verbosity normal
+
+      - name: Run network-free smoke test
+        run: dotnet run --project tests/Kinsat.Core.Smoketest --no-build --configuration Release
