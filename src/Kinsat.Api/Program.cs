@@ -1,41 +1,33 @@
+using Kinsat.Api.Services;
+using Kinsat.Core.Configuration;
+using Kinsat.Core.Events;
+using Kinsat.Core.Identity;
+using Kinsat.Sdk.Configuration;
+using Kinsat.Sdk.Events;
+using Kinsat.Sdk.Identity;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddSingleton<IIdentityProvider, StandaloneIdentityProvider>();
+builder.Services.AddSingleton<IConfigResolver, ConfigurationEngine>();
+builder.Services.AddSingleton<IEventBus, InProcessEventBus>();
+
+// The seam for continuous LTV monitoring (see Services/LtvMonitorService.cs).
+builder.Services.AddHostedService<LtvMonitorService>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
-
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+// Confirms the host is up and the core contracts resolved through DI correctly.
+// Replace with real endpoints as the loan lifecycle, custody, and scoring land.
+app.MapGet("/health", (IConfigResolver config, IEventBus events, IIdentityProvider identity) =>
+    Results.Ok(new
+    {
+        status = "ok",
+        configResolver = config.GetType().Name,
+        eventBus = events.GetType().Name,
+        identityProvider = identity.GetType().Name
+    }));
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
