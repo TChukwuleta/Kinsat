@@ -94,7 +94,7 @@ public class ConfigurationEngineTests
         var config = new ConfigurationEngine();
         var admin = ContextFor("mfi-lagos", Role.MerchantAdmin);
 
-        var resolved = await config.Resolve<decimal>(admin, "never-set-key", fallback: 0.5m);
+        var resolved = await config.ResolveOr(admin, "never-set-key", 0.5m);
 
         Assert.Equal(0.5m, resolved);
     }
