@@ -7,10 +7,11 @@ using Kinsat.Sdk.Identity;
 
 namespace Kinsat.Core.Tests;
 
+
 public class ConfigurationEngineTests
 {
     private static CallContext ContextFor(string tenantId, Role role, string subject = "user") =>
-        CallContext.From(new KinsatPrincipal(subject, tenantId, role, subject));
+        TestIdentity.Context(new KinsatPrincipal(subject, tenantId, role, subject));
 
     [Fact]
     public async Task Product_scope_overrides_tenant_and_system()
