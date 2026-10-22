@@ -6,7 +6,6 @@ using Kinsat.Sdk.Events;
 
 namespace Kinsat.Core.Tests;
 
-
 public class EventBusTests
 {
     [Fact]
@@ -60,4 +59,3 @@ public class EventBusTests
         Assert.Null(exception);
     }
 }
-

@@ -2,29 +2,24 @@
 
 /// <summary>
 /// Proof that a call has been authenticated. Every core operation that reads or changes
-/// tenant data takes a CallContext, and the intent is that the only way to obtain one is
-/// an IIdentityProvider succeeding (AuthenticateAsync, or ValidateAsync for an existing
-/// session).
+/// tenant data takes a CallContext. There is no public constructor and no public factory:
+/// the only code that can mint one is a class deriving from IdentityProviderBase, which
+/// exposes a protected Issue method. So holding a CallContext means an identity provider
+/// vouched for it, and a stray piece of code cannot simply declare itself a SystemAdmin.
 ///
-/// KNOWN GAP, not yet fixed: From() below is public, and KinsatPrincipal's constructor is
-/// public too, so any code that references Kinsat.Sdk can currently mint a CallContext
-/// claiming any Role or TenantId, including SystemAdmin, without ever calling an
-/// IIdentityProvider. The compile-time guarantee described above does not actually hold
-/// today. A real fix needs a capability token that only a registered IIdentityProvider
-/// receives at startup, not a public static factory, and is worth doing before any real
-/// deployment. Until then, Security.Guard's tenant/role checks are the actual enforcement
-/// point in this codebase, not CallContext's construction. See
-/// Kinsat.Core.Identity.SystemActor for the one legitimate internal use of From() today
-/// (automated background processes), kept in one named, documented place rather than
-/// constructed ad hoc wherever an automated actor is needed.
+/// What this does and does not stop: it removes accidental and casual forgery at compile
+/// time, since you must write a class that derives from IdentityProviderBase to issue
+/// anything. It does not stop a hostile extension that deliberately subclasses the base,
+/// or reflection. The host decides which identity providers are registered, so the trust
+/// boundary is "which providers did the operator install". Signing principals so the
+/// host can verify them is the later hardening step for closed third-party extensions.
+/// Security.Guard still enforces tenant and role checks on every operation regardless.
 /// </summary>
 public sealed class CallContext
 {
     public KinsatPrincipal Principal { get; }
 
-    private CallContext(KinsatPrincipal principal) => Principal = principal;
-
-    public static CallContext From(KinsatPrincipal principal) => new(principal);
+    internal CallContext(KinsatPrincipal principal) => Principal = principal;
 
     public string TenantId => Principal.TenantId;
     public Role Role => Principal.Role;

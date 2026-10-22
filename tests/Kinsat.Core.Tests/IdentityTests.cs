@@ -32,7 +32,7 @@ public class IdentityTests
         var provider = NewProviderWithUser("mfi-lagos", "officer.ada", Role.LoanOfficer);
 
         var result = await provider.Authenticate(new AuthenticationRequest("mfi-lagos", "officer.ada", "password", "s3cret"));
-        var context = CallContext.From(result.Principal!);
+        var context = result.Context!;
 
         Assert.True(result.Succeeded);
         Assert.Equal("mfi-lagos", context.TenantId);
@@ -66,7 +66,7 @@ public class IdentityTests
     public void SystemAdmin_context_can_access_any_tenant()
     {
         var principal = new KinsatPrincipal("root.tobe", "platform", Role.SystemAdmin, "Tobe");
-        var context = CallContext.From(principal);
+        var context = TestIdentity.Context(principal);
 
         Assert.True(context.CanAccessTenant("mfi-lagos"));
         Assert.True(context.CanAccessTenant("mfi-abuja"));
